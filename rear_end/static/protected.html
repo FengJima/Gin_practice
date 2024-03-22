@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected Page</title>
+</head>
+
+<body>
+    <h1>登录成功</h1>
+    <p>本页面需要验证token</p>
+
+    <script>
+        // 检查是否存在令牌
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            // 如果没有令牌，跳转到登录页面或执行其他未登录操作
+            //console.log("请登录")
+            window.location.href = "/login"; // 假设你的登录页面的URL是 '/login'
+        } else {
+            // 发送令牌到后端进行验证
+            fetch('/api/verifyToken', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 将令牌添加到请求头
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // 令牌验证成功，允许用户访问受保护页面
+                        console.log("Token is valid");
+                    } else {
+                        // 令牌验证失败，跳转到登录页面或执行其他未登录操作
+                        console.error("Token is invalid");
+                        window.location.href = "/login"; // 假设你的登录页面的URL是 '/login'
+                    }
+                })
+                .catch(error => {
+                    console.error("An error occurred while verifying the token", error);
+                    // 处理验证令牌时的错误
+                });
+        }
+    </script>
+</body>
+
+</html>

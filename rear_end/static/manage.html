@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .enable-btn {
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .disable-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>User Password</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- User data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchUsers();
+        });
+
+        function fetchUsers() {
+            fetch('http://localhost:8080/api/manage')
+                .then(response => response.json())
+                .then(data => {
+                    const userTableBody = document.getElementById("userTableBody");
+                    userTableBody.innerHTML = ""; // Clear the table body
+
+                    data.forEach(user => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${user.userID}</td>
+                            <td>${user.username}</td>
+                            <td>${user.userpassword}</td>
+                            <td>${user.status}</td>
+                            <td>
+                                <button class="enable-btn" onclick="updateUserStatus(${user.userID}, true)">启用</button>
+                                <button class="disable-btn" onclick="updateUserStatus(${user.userID}, false)">禁用</button>
+                            </td>
+                        `;
+                        userTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        function updateUserStatus(userID, enable) {
+            // 构建POST请求的数据
+            const data = {
+                userID: userID,
+                status: enable
+            };
+
+            // 发送POST请求到服务器
+            fetch('http://localhost:8080/api/manage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // 更新用户状态成功
+                        console.log(`${enable ? 'Enable' : 'Disable'} user ${userID} success.`);
+                        // 更新页面或重新加载用户列表
+                        fetchUsers();
+                    } else {
+                        // 更新用户状态失败
+                        console.error(`${enable ? 'Enable' : 'Disable'} user ${userID} failed.`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user status:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>

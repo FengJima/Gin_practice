@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        .login-container {
+            width: 350px;
+            padding: 20px;
+            margin: 0 auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="button"] {
+            background-color: #6c757d;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #error-message {
+            color: red;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #admin-login-button {
+            background-color: #ff0000;
+            color: white;
+            font-weight: bold;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #admin-login-button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="error-message" style="color: red; font-size: 18px; font-weight: bold;"></div>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <button id="register-button" type="button">Register</button>
+            <button id="admin-login-button" type="button">Admin Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("login-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // 发送登录请求到后端
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data.error) {
+                        // 显示错误消息
+                        const errorMessageElement = document.getElementById("error-message");
+                        errorMessageElement.innerText = data.error;
+                    } else {
+                        //将token令牌存到localStorage中
+                        localStorage.setItem("token", data.token);
+                        window.location.href = '/protected';
+                    }
+                })
+                .catch(error => {
+                    console.error('An error occurred while logging in', error);
+                });
+        });
+
+        document.getElementById("register-button").addEventListener("click", function () {
+            // 跳转到注册页面
+            window.location.href = '/register'; // 假设你有一个注册页面的URL
+        });
+
+        document.getElementById("admin-login-button").addEventListener("click", function () {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // 发送管理员登录请求到后端的/api/adminLogin
+            fetch('/api/adminLogin', { // 假设管理员登录的API路径是/api/adminLogin
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // 管理员登录成功，执行相应操作
+                        return response.json();
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data.error) {
+                        // 显示管理员登录错误消息
+                        const errorMessageElement = document.getElementById("error-message");
+                        errorMessageElement.innerText = data.error;
+                    } else {
+                        //登录成功跳转管理界面
+                        window.location.href = '/manage';
+                    }
+                })
+                .catch(error => {
+                    console.error('An error occurred while logging in', error);
+                });
+        });
+    </script>
+</body>
+
+</html>

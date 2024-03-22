@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Login</title>
+    <style>
+        body {
+            background-image: url('static/background.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            width: 350px;
+            padding: 20px;
+            margin: 0 auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #error-message {
+            color: red;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #otp-login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        #otp-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #otp {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        #otp-login-button {
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="error-message"></div>
+    <div class="login-container">
+        <h2>TOTP Login</h2>
+        <form id="otp-login-form">
+            <div class="form-group" id="otp-container">
+                <label for="otp">Enter TOTP</label>
+                <input type="text" id="otp" required>
+            </div>
+            <button type="submit" id="otp-login-button">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // 获取验证码输入框和登录按钮元素
+        const otpInput = document.getElementById("otp");
+        const otpLoginButton = document.getElementById("otp-login-button");
+
+        // 监听验证码登录按钮的点击事件
+        otpLoginButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            const otp = otpInput.value;
+
+            // 发送OTP登录请求到后端
+            fetch('/api/totplogin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ otp })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data.error) {
+                        // 显示错误消息
+                        const errorMessageElement = document.getElementById("error-message");
+                        errorMessageElement.innerText = data.error;
+                    } else {
+                        // 将token令牌存到localStorage中
+                        localStorage.setItem("token", data.token);
+                        window.location.href = '/protected'; // 跳转到受保护的页面
+                    }
+                })
+                .catch(error => {
+                    console.error('An error occurred while logging in', error);
+                });
+        });
+    </script>
+</body>
+
+</html>
